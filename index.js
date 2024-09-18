@@ -1,5 +1,5 @@
 async function initialFetchCloudWatchData() {
-    let baseURL = "https://r43qi1ulg0.execute-api.us-east-1.amazonaws.com/testing/yamlcloudwatchtest";
+    let baseURL = "https://e7jk6o4svh.execute-api.us-east-1.amazonaws.com/testing/yamlcloudwatchtest";
     try {
        let response = await fetch(baseURL);
         if (!response.ok) {
@@ -24,7 +24,7 @@ async function initialFetchCloudWatchData() {
 }
 
 async function customTimeFetchCloudWatchData(timeframeLength, timeframeUnit) {
-    let baseURL = "https://r43qi1ulg0.execute-api.us-east-1.amazonaws.com/testing/yamlcloudwatchtest";
+    let baseURL = "https://e7jk6o4svh.execute-api.us-east-1.amazonaws.com/testing/yamlcloudwatchtest";
     let timeframeLengthParam = `/?timeframeLength=${timeframeLength}&`;
     let timeframeUnitParam = `timeframeUnit=${timeframeUnit}`;
     let paramURL = baseURL + timeframeLengthParam + timeframeUnitParam;
