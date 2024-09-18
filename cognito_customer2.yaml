@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Cognito User Pool with App Client, Hosted UI, Callback URLs, Sign-out URLs, and MFA enabled
+
+Parameters:
+  UserPoolName:
+    Type: String
+    Description: Name of the Cognito User Pool (must be lowercase letters, numbers, and hyphens)
+    Default: myuserpool
+    MinLength: 1
+    MaxLength: 128
+  AutoVerifiedAttributes:
+    Type: CommaDelimitedList
+    Description: Attributes that Cognito automatically verifies (email or phone_number)
+    Default: email
+  UsernameAttributes:
+    Type: CommaDelimitedList
+    Description: How users will sign in (email, phone_number)
+    Default: email
+  AppClientName:
+    Type: String
+    Description: Name for the Cognito App Client
+    Default: myappclient
+    MinLength: 1
+    MaxLength: 128
+  AllowedCallbackURLs:
+    Type: CommaDelimitedList
+    Description: List of allowed callback URLs for the hosted UI (e.g., after successful authentication)
+    Default: https://cdwcustomer2.s3.amazonaws.com/index.html
+  AllowedLogoutURLs:
+    Type: CommaDelimitedList
+    Description: List of allowed sign-out URLs for the hosted UI (e.g., after sign-out)
+    Default: https://cdwcustomer2.s3.amazonaws.com/logged_out.html
+
+Resources:
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Ref UserPoolName
+      AutoVerifiedAttributes: !Ref AutoVerifiedAttributes
+      UsernameAttributes: !Ref UsernameAttributes
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      DeviceConfiguration:
+        ChallengeRequiredOnNewDevice: false
+        DeviceOnlyRememberedOnUserPrompt: false
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+      MfaConfiguration: 'ON'  # Enable MFA for the User Pool
+      EnabledMfas:             # Specify which MFA methods are enabled
+        - SOFTWARE_TOKEN_MFA    # Enable Authenticator App (TOTP)
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_LINK  # Email verification via link
+      UserPoolAddOns:
+        AdvancedSecurityMode: ENFORCED
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Ref AppClientName
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      AllowedOAuthScopes:
+        - email
+        - openid
+      CallbackURLs: !Ref AllowedCallbackURLs
+      LogoutURLs: !Ref AllowedLogoutURLs
+      AllowedOAuthFlowsUserPoolClient: true
+      SupportedIdentityProviders:
+        - COGNITO
+
+  CognitoUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub "${UserPoolName}-domain"  # Domain name should be lowercase, numbers, and hyphens
+      UserPoolId: !Ref CognitoUserPool
+
+Outputs:
+  UserPoolId:
+    Description: The ID of the Cognito User Pool
+    Value: !Ref CognitoUserPool
+    Export:
+      Name: UserPoolId2
+
+  UserPoolClientId:
+    Description: The ID of the Cognito User Pool Client
+    Value: !Ref CognitoUserPoolClient
+    Export:
+      Name: UserPoolClientId2
+
+  HostedUIURL:
+    Description: The URL of the Cognito Hosted UI
+    Value: !Sub "https://${UserPoolName}-domain.auth.us-east-1.amazoncognito.com/"
+    Export:
+      Name: HostedUIURL2
