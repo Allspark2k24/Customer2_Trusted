@@ -23,7 +23,7 @@ async function initialFetchCloudWatchData() {
 }
 
 async function customTimeFetchCloudWatchData(timeframeLength, timeframeUnit) {
-    let baseURL = "https://x36h4lqlfi.execute-api.us-east-1.amazonaws.com/testing/yamlcloudwatchtest";
+    let baseURL = "https://e7jk6o4svh.execute-api.us-east-1.amazonaws.com/testing/yamlcloudwatchtest";
     let timeframeLengthParam = `/?timeframeLength=${timeframeLength}&`;
     let timeframeUnitParam = `timeframeUnit=${timeframeUnit}`;
     let paramURL = baseURL + timeframeLengthParam + timeframeUnitParam;
